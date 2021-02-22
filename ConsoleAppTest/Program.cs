@@ -29,8 +29,9 @@ namespace ConsoleAppTest
                 //ctx.Summary.AddRange(new[] { summary1, summary2 });
                 //ctx.SaveChanges();
 
-                ctx.Increment<Summary>(x => x.Count, x => x.Id == 1);
+                ctx.Increment<Summary>(x => x.Count, x => x.Id == 1, 5);
                 ctx.Decrement<Summary>(x => x.Count, x => x.Id == 2);
+                ctx.SaveChanges();                
             }
             Console.WriteLine("Hello World!");
         }

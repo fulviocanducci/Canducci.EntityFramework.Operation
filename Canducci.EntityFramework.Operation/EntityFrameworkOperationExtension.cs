@@ -10,6 +10,7 @@ namespace Canducci.EntityFramework.Operation
 
     public static class EntityFrameworkOperationExtension
     {
+        #region GetEntities
         internal static List<T> GetEntities<T>(DbContext dbContext, Expression<Func<T, bool>> where) 
             where T : class, new()
         {
@@ -19,8 +20,10 @@ namespace Canducci.EntityFramework.Operation
                 .AsNoTrackingWithIdentityResolution()
                 .ToList();
         }
+        #endregion
 
-        internal static void SetEntities<T>(List<T> entities, DbContext dbContext, Expression<Func<T, int>> property, TypeOperation typeOperation)
+        #region SetEntities
+        internal static void SetEntities<T>(List<T> entities, DbContext dbContext, Expression<Func<T, int>> property, TypeOperation typeOperation, int value)
             where T : class, new()
         {
             entities.ForEach(c =>
@@ -28,17 +31,17 @@ namespace Canducci.EntityFramework.Operation
                 PropertyEntry<T, int> propertyEntry = dbContext.Entry(c).Property(property);
                 if (TypeOperation.Increment == typeOperation)
                 {
-                    propertyEntry.CurrentValue += 1;
+                    propertyEntry.CurrentValue += value;
                 }
                 else
                 {
-                    propertyEntry.CurrentValue -= 1;
+                    propertyEntry.CurrentValue -= value;
                 }
                 propertyEntry.IsModified = true;
             });
         }
 
-        internal static void SetEntities<T>(List<T> entities, DbContext dbContext, Expression<Func<T, long>> property, TypeOperation typeOperation)
+        internal static void SetEntities<T>(List<T> entities, DbContext dbContext, Expression<Func<T, long>> property, TypeOperation typeOperation, long value)
             where T : class, new()
         {
             entities.ForEach(c =>
@@ -46,57 +49,62 @@ namespace Canducci.EntityFramework.Operation
                 PropertyEntry<T, long> propertyEntry = dbContext.Entry(c).Property(property);
                 if (TypeOperation.Increment == typeOperation) 
                 {
-                    propertyEntry.CurrentValue += 1;
+                    propertyEntry.CurrentValue += value;
                 } 
                 else
                 {
-                    propertyEntry.CurrentValue -= 1;
+                    propertyEntry.CurrentValue -= value;
                 }
                 propertyEntry.IsModified = true;
             });
         }
 
-        internal static bool BaseOperation<T>(this DbContext dbContext, Expression<Func<T, int>> property, Expression<Func<T, bool>> where, TypeOperation typeOperation)
+        #endregion
+
+        #region BaseOperation
+        internal static void BaseOperation<T>(this DbContext dbContext, Expression<Func<T, int>> property, Expression<Func<T, bool>> where, TypeOperation typeOperation, int value)
             where T : class, new()
         {
             List<T> entities = GetEntities(dbContext, where);
-            SetEntities(entities, dbContext, property, typeOperation);
-            return dbContext.SaveChanges() > 0;
+            SetEntities(entities, dbContext, property, typeOperation, value);
         }
 
-        internal static bool BaseOperation<T>(this DbContext dbContext, Expression<Func<T, long>> property, Expression<Func<T, bool>> where, TypeOperation typeOperation)
+        internal static void BaseOperation<T>(this DbContext dbContext, Expression<Func<T, long>> property, Expression<Func<T, bool>> where, TypeOperation typeOperation, long value)
             where T : class, new()
         {
             List<T> entities = GetEntities(dbContext, where);
-            SetEntities(entities, dbContext, property, typeOperation);
-            return dbContext.SaveChanges() > 0;
+            SetEntities(entities, dbContext, property, typeOperation, value);
         }
 
-        public static bool Increment<T>(this DbContext dbContext, Expression<Func<T, int>> property, Expression<Func<T, bool>> where) 
+        #endregion
+
+        #region Increment
+        public static void Increment<T>(this DbContext dbContext, Expression<Func<T, int>> property, Expression<Func<T, bool>> where, int value = 1) 
             where T : class, new()
         {
-            return BaseOperation(dbContext, property, where, TypeOperation.Increment);
+            BaseOperation(dbContext, property, where, TypeOperation.Increment, value);
         } 
 
-        public static bool Increment<T>(this DbContext dbContext, Expression<Func<T, long>> property, Expression<Func<T, bool>> where) 
+        public static void Increment<T>(this DbContext dbContext, Expression<Func<T, long>> property, Expression<Func<T, bool>> where, long value = 1) 
             where T: class, new()
         {
-            return BaseOperation(dbContext, property, where, TypeOperation.Increment);
+            BaseOperation(dbContext, property, where, TypeOperation.Increment, value);
         }
+        #endregion
 
-
-        public static bool Decrement<T>(this DbContext dbContext, Expression<Func<T, int>> property, Expression<Func<T, bool>> where)
+        #region Decrement
+        public static void Decrement<T>(this DbContext dbContext, Expression<Func<T, int>> property, Expression<Func<T, bool>> where, int value = 1)
             where T : class, new()
         {
-            return BaseOperation(dbContext, property, where, TypeOperation.Decrement);
+            BaseOperation(dbContext, property, where, TypeOperation.Decrement, value);
         }
 
-        public static bool Decrement<T>(this DbContext dbContext, Expression<Func<T, long>> property, Expression<Func<T, bool>> where)
+        public static void Decrement<T>(this DbContext dbContext, Expression<Func<T, long>> property, Expression<Func<T, bool>> where, long value = 1)
             where T : class, new()
         {
-            return BaseOperation(dbContext, property, where, TypeOperation.Decrement);
+            BaseOperation(dbContext, property, where, TypeOperation.Decrement, value);
         }
-
+        #endregion
 
     }
 }
